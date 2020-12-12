@@ -258,6 +258,22 @@ OptionSet<SanitizerKind> swift::parseSanitizerRecoverArgValues(
   return sanitizerRecoverSet;
 }
 
+bool swift::parseSanitizerAddressUseODRIndicator(
+    const llvm::opt::Arg *A, const OptionSet<SanitizerKind> &enabledSanitizers,
+    DiagnosticEngine &Diags) {
+  if (!A)
+    return false;
+
+  // Warn if ASan isn't enabled.
+  if (!(enabledSanitizers & SanitizerKind::Address)) {
+    Diags.diagnose(
+        SourceLoc(), diag::warning_option_requires_specific_sanitizer,
+        A->getOption().getPrefixedName(), toStringRef(SanitizerKind::Address));
+  }
+
+  return true;
+}
+
 std::string swift::getSanitizerList(const OptionSet<SanitizerKind> &Set) {
   std::string list;
   #define SANITIZER(_, kind, name, file) \
